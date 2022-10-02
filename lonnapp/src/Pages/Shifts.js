@@ -8,4 +8,16 @@ function Shifts() {
   );
 }
 
+
+/*
+json format
+{
+  Date: int date
+  Start: int start hour
+  End: int end hour
+  Hours: int hours
+  IsSaturday: bool
+  IsSunday: bool
+}
+*/
 export default Shifts;
