@@ -2,12 +2,13 @@ import React from 'react';
 import './App.css';
 import Navbar from './components/Navbar';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './Pages/Home';
-import Shifts from './Pages/Shifts';
-import Settings from './Pages/Settings';
-import Rules from './Pages/Rules';
+import Home from './Pages/HomePage';
+import Shifts from './Pages/ShiftsPage';
+import Settings from './Pages/SettingsPage';
+import Rules from './Pages/RulesPage';
 
 function App() {
+
   return (
     <div>
     <BrowserRouter>

@@ -1,10 +1,10 @@
 import React from 'react';
-import Shifts from './components/Shift';
+import Shift from './Shift';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const ToDoList = ({toDoList, handleToggle, handleFilter, clearAll}) => {
+const ShiftList = ({ShiftList, handleToggle, handleFilter, clearAll}) => {
     return (
         <div>
         <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
@@ -13,13 +13,13 @@ const ToDoList = ({toDoList, handleToggle, handleFilter, clearAll}) => {
             <DeleteIcon fontSize="inherit"/>
             </IconButton>
             </Stack>
-            {toDoList.map(todo => {
+            {ShiftList.map(shift => {
                 return (
-                    <Shifts todo={todo} handleToggle={handleToggle}/>
+                    <Shift shift={shift} handleToggle={handleToggle}/>
                 )
             })}
         </div>
     );
 };
 
-export default ToDoList;
+export default ShiftList;

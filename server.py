@@ -3,6 +3,9 @@ from flask import Flask, jsonify, abort, make_response, request
 from flask_cors import CORS
 import time
 from random import random
+import datetime as date
+
+x = date.datetime.now()
 
 items = [
     {"id": 1, "name": "Create a client application", "done": False},
