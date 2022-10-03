@@ -1,29 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import ToDoList from '../TodoList';
+import ShiftList from '../TodoList';
 import TodoForm from '../Form';
 import '../Shiftpage.css';
+import data from '../Shiftdata.json'
 
 function App() {
-  const [ toDoList, setToDoList ] = useState([]);
+  const [ shiftsList, setShiftList ] = useState(data);
 
   useEffect(() =>  {
     fetch('http://127.0.0.1:5000/api/items/')
     .then(response => response.json())
-    .then(data => setToDoList(data.items));
+    .then(data => setShiftList(data.items));
   }, []);
 
   const handleToggle = (id) => {
-    let mapped = toDoList.map(task => {
+    let mapped = shiftsList.map(task => {
       return task.id === Number(id) ? { ...task, done: !task.done } : { ...task};
     });
-    setToDoList(mapped);
+    setShiftList(mapped);
   }
 
   const handleFilter = () => { //delete certain
-    let filtered = toDoList.filter(task => {
+    let filtered = shiftsList.filter(task => {
       return !task.done;
     });
-    let difference = toDoList.filter(x => !filtered.includes(x));
+    let difference = shiftsList.filter(x => !filtered.includes(x));
     difference.map(task => {
       fetch('http://127.0.0.1:5000/api/items/' + task.id, {
        method: 'DELETE', 
@@ -34,7 +35,7 @@ function App() {
    });
    return null;
     })
-    setToDoList(filtered);
+    setShiftList(filtered);
   }
 
   const addTask = (userInput) => { //POST
@@ -46,16 +47,16 @@ function App() {
        body: JSON.stringify({
         name: userInput,
         done: false,
-        Id: toDoList.length+1
+        Id: shiftsList.length+1
        })
    });
    fetch('http://127.0.0.1:5000/api/items') //get updated list so it displays without refreshing
     .then(response => response.json())
-    .then(data => setToDoList(data.items));
+    .then(data => setShiftList(data.items));
   };
 
   const ClearAll = () => { //delete all
-    toDoList.map(todo => {
+    shiftsList.map(todo => {
         fetch('http://127.0.0.1:5000/api/items/' + todo.id, {
          method: 'DELETE', 
          headers: {
@@ -65,7 +66,7 @@ function App() {
      });
      return null;
       });
-      setToDoList([]); //tacky but works so it deletes all without refreshing
+      setShiftList([]); //tacky but works so it deletes all without refreshing
   };
   
  return (
@@ -73,11 +74,11 @@ function App() {
      <h1>
       Shifts page
       </h1>
-      {/* <TodoForm addTask={addTask} direction="row" 
+      <TodoForm addTask={addTask} direction="row" 
       spacing={2} 
       alignItems="center" 
-      justifyContent="center"/> */}
-      <ToDoList toDoList={toDoList} handleToggle={handleToggle} handleFilter={handleFilter} clearAll={ClearAll} 
+      justifyContent="center"/>
+      <ShiftList ShiftList={shiftsList} handleToggle={handleToggle} handleFilter={handleFilter} clearAll={ClearAll} 
       direction="row" 
       spacing={2} 
       alignItems="center" 

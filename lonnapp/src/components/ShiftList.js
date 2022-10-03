@@ -1,5 +1,5 @@
 import React from 'react';
-import Shift from './Shift';
+import todo from '../Todo';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -15,7 +15,7 @@ const ShiftList = ({ShiftList, handleToggle, handleFilter, clearAll}) => {
             </Stack>
             {ShiftList.map(shift => {
                 return (
-                    <Shift shift={shift} handleToggle={handleToggle}/>
+                    <todo todo={todo} handleToggle={handleToggle}/>
                 )
             })}
         </div>

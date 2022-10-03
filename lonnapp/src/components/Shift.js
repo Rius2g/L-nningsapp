@@ -1,14 +1,9 @@
 import React from 'react';
 
-const Shifts = ({todo, handleToggle}) => {
-    const handleClick = (e) => {
-        e.preventDefault()
-        handleToggle(e.currentTarget.id)
-    }
-
+const Shifts = ({Shift, handleToggle}) => {
     return (
-        <div id={todo.id} key={todo.id + todo.name} name="todo" value={todo.id} onClick={handleClick} className={todo.done ? "todo strike" : "todo"}>
-            {todo.name}
+        <div date={Shift.id} key={Shift.id + Shift.name} name="Shift" value={Shift.id}>
+            {Shift.name}
         </div>
     );
 };
