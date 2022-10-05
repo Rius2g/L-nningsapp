@@ -1,17 +1,8 @@
 [
   {
-  "done": false,
+  "start": "14:30",
   "id": 1,
-  "name": "Create a client application"
-},
-{
-  "done": false,
-  "id": 2,
-  "name": "Write an excellent report"
-},
-{
-  "done": false,
-  "id": 3,
-  "name": "Jazz it up with some cool features?"
+  "date": "05/10/2022",
+  "end": "22:00"
 }
 ]

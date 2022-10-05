@@ -4,7 +4,7 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const ShiftList = ({ShiftList, handleToggle, handleFilter, clearAll}) => {
+const ShiftList = ({ShiftList, handleFilter, clearAll}) => {
     return (
         <div>
         <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
