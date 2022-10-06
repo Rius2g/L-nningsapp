@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import ShiftList from '../TodoList';
-import TodoForm from '../Form';
+import ShiftList from '../components/ShiftList';
+import TodoForm from '../components/ShiftForm';
 import '../Shiftpage.css';
 import data from '../Shiftdata.json'
 
 function App() {
   const [ shiftsList, setShiftList ] = useState(data);
 
-  useEffect(() =>  {
+  /*useEffect(() =>  {
     fetch('http://127.0.0.1:5000/api/items/')
     .then(response => response.json())
     .then(data => setShiftList(data.items));
-  }, []);
+  }, []); */
 
   const handleToggle = (id) => {
     let mapped = shiftsList.map(task => {
