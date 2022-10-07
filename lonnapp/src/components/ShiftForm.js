@@ -1,42 +1,38 @@
 import React, { useState } from 'react';
+import DatePicker from 'react-date-picker'
+import TimeRangePicker from '@wojtekmaj/react-timerange-picker'
+import '../Shiftpage.css'
 import SendIcon from '@mui/icons-material/Send';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import TimePick from './Timepicker';
+import Moment from 'moment';
 
-const ToDoForm = ({ addTask }) => {
+const ShiftForm = ({ addShift }) => {
 
-    const [ userInput, setUserInput ] = useState('');
+    const [ workDate, setWorkDate ] = useState(new Date());
 
-    const handleChange = (e) => {
-        setUserInput(e.currentTarget.value)
+    function handleSubmit(date) {
+        setWorkDate(date);
+        addShift(date, "10", "10");
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        addTask(userInput);
-        setUserInput("");
-    }
     return (
-        <div style={{
+        <div className='rowline' style={{
           margin: 'auto',
-          display: 'block',
-          width: 'fit-content'
-        }} direction="row" 
-        spacing={2} 
-        alignItems="center" 
-        justifyContent="center">
-          <TextField
-            id="date"
-            label=""
-            type="date"
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-          <TimePick></TimePick>
+          width: 'fit-content',
+          display: 'flex'
+        }}>
+          <DatePicker id="datepicker"
+                           viewMode="days"
+                           timeFormat={false}
+                            dateFormat="DD-MM-YY"
+                            value={workDate}
+                           onChange={setWorkDate} />
+            <Button variant="contained" onClick={handleSubmit} endIcon={<SendIcon />} style={{ minHeight: '7vh' }}>
+                Submit
+            </Button>
+          {/* <TimeRangePicker /> */}
         </div>
       );
 };
 
-export default ToDoForm;
+export default ShiftForm;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ShiftList from '../components/ShiftList';
-import TodoForm from '../components/ShiftForm';
+import ShiftForm from '../components/ShiftForm';
 import '../Shiftpage.css';
 import data from '../Shiftdata.json'
 
@@ -38,21 +38,9 @@ function App() {
     setShiftList(filtered);
   }
 
-  const addTask = (userInput) => { //POST
-    fetch('http://127.0.0.1:5000/api/items/', {
-       method: 'POST', 
-       headers: {
-         'Content-Type': 'application/json'
-       },
-       body: JSON.stringify({
-        name: userInput,
-        done: false,
-        Id: shiftsList.length+1
-       })
-   });
-   fetch('http://127.0.0.1:5000/api/items') //get updated list so it displays without refreshing
-    .then(response => response.json())
-    .then(data => setShiftList(data.items));
+  const addShift = (workDate, startTime, EndTime) => { //POST
+    const newShiftList = [...shiftsList, {"id": shiftsList.length+1, "date": workDate, "start": startTime, "end": EndTime}];
+    setShiftList(newShiftList)
   };
 
   const ClearAll = () => { //delete all
@@ -74,7 +62,7 @@ function App() {
      <h1>
       Shifts page
       </h1>
-      <TodoForm addTask={addTask} direction="row" 
+      <ShiftForm addShift={addShift} direction="row" 
       spacing={2} 
       alignItems="center" 
       justifyContent="center"/>
