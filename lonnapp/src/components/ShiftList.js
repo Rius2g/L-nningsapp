@@ -8,7 +8,6 @@ const ShiftList = ({ShiftList, handleFilter, clearAll}) => {
     return (
         <div>
         <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
-            <button style={{margin: '20px'}} onClick={handleFilter}>Clear Completed</button>
             <IconButton aria-label="delete all" color="secondary" onClick={clearAll} >
             <DeleteIcon fontSize="inherit"/>
             </IconButton>

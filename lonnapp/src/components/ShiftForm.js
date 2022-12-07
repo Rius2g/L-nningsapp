@@ -1,36 +1,64 @@
 import React, { useState } from 'react';
 import DatePicker from 'react-date-picker'
-import TimeRangePicker from '@wojtekmaj/react-timerange-picker'
+import TimePicker from 'react-time-picker'
 import '../Shiftpage.css'
 import SendIcon from '@mui/icons-material/Send';
 import Button from '@mui/material/Button';
-import Moment from 'moment';
+
+const defaultValues = {
+  ReactDatepicker: new Date(),
+  starttime: "10:00",
+  endtime: "10:00"
+};
 
 const ShiftForm = ({ addShift }) => {
 
     const [ workDate, setWorkDate ] = useState(new Date());
+    const [ startTime, setStarttime ] = useState('10:00');
+    const [ endTime, setEndtime ] = useState("10:00");
 
-    function handleSubmit(date) {
+    const onChange = date => {
         setWorkDate(date);
-        addShift(date, "10", "10");
+    }
+
+    const onChangeStart = time => {
+        setStarttime(time);
+    }
+
+    const onChangeEnd = time => {
+        setEndtime(time);
+    }
+
+    function handleSubmit() {
+        addShift(workDate.toDateString(), startTime.toString(), endTime.toString());
     }
 
     return (
+      
         <div className='rowline' style={{
           margin: 'auto',
           width: 'fit-content',
-          display: 'flex'
+          display: 'flex',
         }}>
+
           <DatePicker id="datepicker"
                            viewMode="days"
                            timeFormat={false}
                             dateFormat="DD-MM-YY"
                             value={workDate}
                            onChange={setWorkDate} />
-            <Button variant="contained" onClick={handleSubmit} endIcon={<SendIcon />} style={{ minHeight: '7vh' }}>
+
+          <TimePicker id="timerange start" onChange={onChangeStart} value={startTime} />
+
+            <TimePicker id="timerange end"
+                            value={[endTime]}
+                            onChange={onChangeEnd}
+                            />
+
+
+        <Button variant="contained" onClick={handleSubmit} endIcon={<SendIcon />} style={{ minHeight: '7vh' }}>
                 Submit
             </Button>
-          {/* <TimeRangePicker /> */}
         </div>
       );
 };

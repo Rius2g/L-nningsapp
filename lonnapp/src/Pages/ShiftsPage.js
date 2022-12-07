@@ -13,30 +13,6 @@ function App() {
     .then(data => setShiftList(data.items));
   }, []); */
 
-  const handleToggle = (id) => {
-    let mapped = shiftsList.map(task => {
-      return task.id === Number(id) ? { ...task, done: !task.done } : { ...task};
-    });
-    setShiftList(mapped);
-  }
-
-  const handleFilter = () => { //delete certain
-    let filtered = shiftsList.filter(task => {
-      return !task.done;
-    });
-    let difference = shiftsList.filter(x => !filtered.includes(x));
-    difference.map(task => {
-      fetch('http://127.0.0.1:5000/api/items/' + task.id, {
-       method: 'DELETE', 
-       headers: {
-         'Content-Type': 'application/json'
-       },
-       body: null
-   });
-   return null;
-    })
-    setShiftList(filtered);
-  }
 
   const addShift = (workDate, startTime, EndTime) => { //POST
     const newShiftList = [...shiftsList, {"id": shiftsList.length+1, "date": workDate, "start": startTime, "end": EndTime}];
@@ -45,13 +21,13 @@ function App() {
 
   const ClearAll = () => { //delete all
     shiftsList.map(todo => {
-        fetch('http://127.0.0.1:5000/api/items/' + todo.id, {
-         method: 'DELETE', 
-         headers: {
-           'Content-Type': 'application/json'
-         },
-         body: null
-     });
+    //     fetch('http://127.0.0.1:5000/api/items/' + todo.id, {
+    //      method: 'DELETE', 
+    //      headers: {
+    //        'Content-Type': 'application/json'
+    //      },
+    //      body: null
+    //  });
      return null;
       });
       setShiftList([]); //tacky but works so it deletes all without refreshing
@@ -62,11 +38,13 @@ function App() {
      <h1>
       Shifts page
       </h1>
+      
       <ShiftForm addShift={addShift} direction="row" 
-      spacing={2} 
+      spacing={100}
+      margin={100} 
       alignItems="center" 
       justifyContent="center"/>
-      <ShiftList ShiftList={shiftsList} handleToggle={handleToggle} handleFilter={handleFilter} clearAll={ClearAll} 
+      <ShiftList ShiftList={shiftsList} clearAll={ClearAll} 
       direction="row" 
       spacing={2} 
       alignItems="center" 
