@@ -5,21 +5,12 @@ import '../Shiftpage.css'
 import SendIcon from '@mui/icons-material/Send';
 import Button from '@mui/material/Button';
 
-const defaultValues = {
-  ReactDatepicker: new Date(),
-  starttime: "10:00",
-  endtime: "10:00"
-};
 
 const ShiftForm = ({ addShift }) => {
 
     const [ workDate, setWorkDate ] = useState(new Date());
     const [ startTime, setStarttime ] = useState('10:00');
     const [ endTime, setEndtime ] = useState("10:00");
-
-    const onChange = date => {
-        setWorkDate(date);
-    }
 
     const onChangeStart = time => {
         setStarttime(time);
