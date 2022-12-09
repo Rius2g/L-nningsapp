@@ -1,18 +1,21 @@
 import { Stack } from '@mui/material';
-import { flexbox } from '@mui/system';
 import React, { useState, useEffect } from 'react';
 import UserDisplay from '../components/UserList';
 
 function Settings() {
 
-  const [ payRate, setPayRate ] = useState(10);
-  const [ taxRate, setTaxRate ] = useState(5);
+  const [ payRate, setPayRate ] = useState(0);
+  const [ taxRate, setTaxRate ] = useState(0);
 
-  // useEffect(() =>  {
-  //   fetch('http://127.0.0.1:5000/api/items/')
-  //   .then(response => response.json())
-  //   .then(data => setPayRate(data));
-  // }, []);
+  useEffect(() =>  {
+    fetch('http://127.0.0.1:5000/api/payrate/')
+    .then(response => response.json())
+    .then(data => setPayRate(data));
+
+    fetch('http://127.0.0.1:5000/api/taxrate/')
+    .then(response => response.json())
+    .then(data => setTaxRate(data));
+  }, []);
 
 
 

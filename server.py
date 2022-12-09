@@ -8,10 +8,10 @@ import datetime as date
 x = date.datetime.now()
 
 items = [
-    {"id": 1, "name": "Create a client application", "done": False},
-    {"id": 2, "name": "Write an excellent report", "done": False},
-    {"id": 3, "name": "Jazz it up with some cool features?", "done": False},
 ]
+
+payrate = "100"
+taxrate = "10"
 
 app = Flask(__name__)
 CORS(app)
@@ -53,8 +53,16 @@ def bad_request_error(error):
 
 
 @app.route("/api/items/", methods=["GET"])
-def get_items():
+def get_items(): 
     return jsonify({"items": items})
+
+@app.route("/api/payrate/", methods=["GET"])
+def get_payrate(): 
+    return payrate
+
+@app.route("/api/taxrate/", methods=["GET"])
+def get_taxrate(): 
+    return taxrate
 
 
 @app.route("/api/items/<int:item_id>", methods=["GET"])
@@ -70,13 +78,13 @@ def get_item(item_id):
 def create_item():
     if not request.json:
         abort(400, "Must be JSON.")
-    if "name" not in request.json:
-        abort(400, "Must contain 'name'-field.")
-    if not isinstance(request.json["name"], str):
+    if "date" not in request.json:
+        abort(400, "Must contain 'date'-field.")
+    if not isinstance(request.json["date"], str):
         description = f"'name'-field must be str."
         abort(400, description)
     new_id = 0 if not items else max(item["id"] for item in items) + 1
-    item = {"id": new_id, "name": request.json["name"], "done": False}
+    item = {"id": new_id, "date": request.json["date"], "start": request.json["start"], "end": request.json["end"]}
     items.append(item)
     return jsonify({"item": item}), 201
 
