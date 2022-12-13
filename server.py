@@ -7,11 +7,20 @@ import datetime as date
 
 x = date.datetime.now()
 
-items = [
-]
+class User:
 
-payrate = "100"
-taxrate = "10"
+    def __init__(self): #settings in the top
+        self.payrate = 10
+        self.taxrate = 7
+
+        self.items = []#array for shifts
+
+    def put_settings(self, payrate, taxrate): #update the settings
+        self.payrate = payrate
+        self.taxrate = taxrate
+  
+
+User1 = User()
 
 app = Flask(__name__)
 CORS(app)
@@ -54,20 +63,29 @@ def bad_request_error(error):
 
 @app.route("/api/items/", methods=["GET"])
 def get_items(): 
-    return jsonify({"items": items})
+    return jsonify({"items": User1.items})
+
 
 @app.route("/api/payrate/", methods=["GET"])
 def get_payrate(): 
-    return payrate
+    return jsonify(payrate=str(User1.payrate))
+
 
 @app.route("/api/taxrate/", methods=["GET"])
 def get_taxrate(): 
-    return taxrate
+    return jsonify(taxrate=str(User1.taxrate))
+
+
+
+@app.route("/api/payrate/", methods=["PUT"])
+def update_payrate(): 
+    User1.put_settings(request.json["payrate"], request.json["taxrate"])
+    return jsonify(payrate=str(User1.payrate) , taxrate=str(User1.taxrate))
 
 
 @app.route("/api/items/<int:item_id>", methods=["GET"])
 def get_item(item_id):
-    for item in items:
+    for item in User1.items:
         if item["id"] == item_id:
             return jsonify({"item": item})
     message = f"No item with ID {item_id}."
@@ -83,9 +101,9 @@ def create_item():
     if not isinstance(request.json["date"], str):
         description = f"'name'-field must be str."
         abort(400, description)
-    new_id = 0 if not items else max(item["id"] for item in items) + 1
+    new_id = 0 if not User1.items else max(item["id"] for item in User1.items) + 1
     item = {"id": new_id, "date": request.json["date"], "start": request.json["start"], "end": request.json["end"]}
-    items.append(item)
+    User1.items.append(item)
     return jsonify({"item": item}), 201
 
 
@@ -94,7 +112,7 @@ def update_item(item_id):
     if not request.json:
         abort(400, "Must be JSON.")
     wanted_item = None
-    for item in items:
+    for item in User1.items:
         if item["id"] == item_id:
             wanted_item = item
             break
@@ -121,14 +139,14 @@ def update_item(item_id):
 @app.route("/api/items/<int:item_id>", methods=["DELETE"])
 def delete_item(item_id):
     old_item = False
-    for item in items:
+    for item in User1.items:
         if item["id"] == item_id:
             old_item = item
             break
     if not old_item:
         message = f"No item with ID {item_id}."
         abort(404, message)
-    items.remove(old_item)
+    User1.items.remove(old_item)
     return jsonify({"deleted": True})
 
 
