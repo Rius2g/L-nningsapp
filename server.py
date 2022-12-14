@@ -5,19 +5,23 @@ import time
 from random import random
 import datetime as date
 
-x = date.datetime.now()
-
 class User:
 
     def __init__(self): #settings in the top
-        self.payrate = 10
-        self.taxrate = 7
+        self.payrate = 1
+        self.taxrate = 1
 
         self.items = []#array for shifts
+        self.startRange = date.datetime.now().strftime("%H:%M") #start time
+        self.endRange = date.datetime.now().strftime("%H:%M") #end time
 
     def put_settings(self, payrate, taxrate): #update the settings
         self.payrate = payrate
         self.taxrate = taxrate
+
+    def put_range(self, startRange, endRange): #update the range
+        self.startRange = startRange
+        self.endRange = endRange
   
 
 User1 = User()
@@ -25,6 +29,21 @@ User1 = User()
 app = Flask(__name__)
 CORS(app)
 
+
+datedict = {
+    "Jan": "01",
+    "Feb": "02",
+    "Mar": "03",
+    "Apr": "04",
+    "May": "05",
+    "Jun": "06",
+    "Jul": "07",
+    "Aug": "08",
+    "Sep": "09",
+    "Oct": "10",
+    "Nov": "11",
+    "Dec": "12"
+}
 
 # Once your client works, you can apply this decorator
 # to one of the endpoints to add a random delay to simulate
@@ -74,6 +93,37 @@ def get_payrate():
 @app.route("/api/taxrate/", methods=["GET"])
 def get_taxrate(): 
     return jsonify(taxrate=str(User1.taxrate))
+
+    
+@app.route("/api/expectedpay/", methods=["PUT"])
+def get_payrange():
+     User1.put_range(request.json["startRange"], request.json["endRange"])
+     return jsonify(startRange=str(User1.startRange), endRange=str(User1.endRange))
+
+
+
+def date_compare(date1, startdate, enddate):
+    print(startdate)
+    print(enddate)
+    if date > startdate and date < enddate:
+        print("HEIA")
+        return True
+
+@app.route("/api/expectedpay/", methods=["GET"])
+def get_expectedpay(): 
+    total = 0
+    for item in User1.items:
+        if date_compare(item["date"], User1.startRange, User1.endRange):
+            hours = (int(item["end"][0:2]) - int(item["start"][0:2]))
+            total += hours * int(User1.payrate)
+            if int(item["end"][3:5]) > 0: #for minutes
+                minute_rate = int(User1.payrate) / 60
+                minutes = (int(item["end"][3:5]) - int(item["start"][3:5]))
+                if minutes < 0:
+                    minutes = minutes + 60
+                total += minutes * minute_rate
+    total = total - (total * (int(User1.taxrate) / 100))
+    return jsonify(expectedpay=str(total))
 
 
 
