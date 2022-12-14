@@ -12,8 +12,8 @@ class User:
         self.taxrate = 1
 
         self.items = []#array for shifts
-        self.startRange = date.datetime.now().strftime("%H:%M") #start time
-        self.endRange = date.datetime.now().strftime("%H:%M") #end time
+        self.startRange = ""
+        self.endRange = ""
 
     def put_settings(self, payrate, taxrate): #update the settings
         self.payrate = payrate
@@ -97,23 +97,27 @@ def get_taxrate():
     
 @app.route("/api/expectedpay/", methods=["PUT"])
 def get_payrange():
-     User1.put_range(request.json["startRange"], request.json["endRange"])
-     return jsonify(startRange=str(User1.startRange), endRange=str(User1.endRange))
+
+    User1.put_range(request.json["startRange"][0:10], request.json["endRange"][0:10])
+    return jsonify(startRange=str(User1.startRange), endRange=str(User1.endRange))
 
 
 
-def date_compare(date1, startdate, enddate):
-    print(startdate)
-    print(enddate)
-    if date > startdate and date < enddate:
-        print("HEIA")
+def date_compare(date): #date to int conversion before comparing
+    newdate = int(date[11:15]) *10000 + int(datedict[date[4:7]])*100 + int(date[8:11])
+    startdate = int(User1.startRange[0:4]) *10000 + int(User1.startRange[5:7])*100 + int(User1.startRange[8:10])
+    enddate = int(User1.endRange[0:4]) *10000 + int(User1.endRange[5:7])*100 + int(User1.endRange[8:10])
+    if newdate >= startdate and newdate <= enddate:
         return True
+    else:
+        return False
+
 
 @app.route("/api/expectedpay/", methods=["GET"])
 def get_expectedpay(): 
     total = 0
     for item in User1.items:
-        if date_compare(item["date"], User1.startRange, User1.endRange):
+        if date_compare(item["date"]):
             hours = (int(item["end"][0:2]) - int(item["start"][0:2]))
             total += hours * int(User1.payrate)
             if int(item["end"][3:5]) > 0: #for minutes
