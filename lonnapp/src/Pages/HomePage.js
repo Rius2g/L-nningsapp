@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Stack } from '@mui/material';
 import DatePicker from 'react-date-picker'
 import SendIcon from '@mui/icons-material/Send';
+import { format } from 'date-fns'
 
 function Home() {
 
@@ -45,8 +46,10 @@ function Home() {
       display: 'flex',
     }}>
       <Stack spacing={2}>
-      <h1>Home</h1>
+      <h1>Home </h1>
 
+      <p> Selected range is </p>
+      <p>{startRange.toDateString()} - {endRange.toDateString()}</p>
       <Stack spacing={2} direction="row">
       <DatePicker id="datepicker"
                            viewMode="days"
