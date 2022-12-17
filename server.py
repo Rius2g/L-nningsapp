@@ -15,37 +15,48 @@ class User:
         self.startRange = ""
         self.endRange = ""
 
-    def create_db(self):
+
+    def create_db(self): #create two tables for shifts and settings
         self.connection = sqlite3.connect("shifts.db") #connect to the database
         self.cursor = self.connection.cursor() #create a cursor
         sql_command = """ CREATE TABLE IF NOT EXISTS shifts ( 
-                Sid INTEGER PRIMARY KEY,
-                Uid INTEGER NOT NULL,
+                Sid INTEGER PRIMARY KEY AUTOINCREMENT,
+                Uid INTEGER NOT NULL AUTOINCREMENT,
                 Date INTEGER(255) NOT NULL,
                 Start varchar(255) NOT NULL,
                 End varchar(255) NOT NULL);"""
 
+        sql_command2 = """ CREATE TABLE IF NOT EXISTS users ( 
+                Uid INTEGER PRIMARY KEY AUTOINCREMENT,
+                Payrate INTEGER NOT NULL,
+                Taxrate INTEGER NOT NULL,
+                Name varchar(255)
+                FOREIGN KEY(Uid) REFERENCES shifts(uid));"""
+
             #shift id, user id, date, start time, end time
-        self.cursor.execute(sql_command)
+        self.cursor.execute(sql_command) #create the shifts table
+        self.cursor.execute(sql_command2) #create the user/settings table with foreign key uid
         self.connection.commit()
         self.cursor.close()
+
 
     def close_db(self):
         self.cursor.close()
         self.connection.close()
         
 
-
     def put_settings(self, payrate, taxrate): #update the settings
         self.payrate = payrate
         self.taxrate = taxrate
+        
 
     def put_range(self, startRange, endRange): #update the range
         self.startRange = startRange
         self.endRange = endRange
   
 
-User1 = User()
+User1 = User() # Create the application instance
+User1.create_db() #init the databases if not already created
 
 app = Flask(__name__)
 CORS(app)
