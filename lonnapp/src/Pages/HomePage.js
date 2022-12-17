@@ -29,6 +29,7 @@ function Home() {
         endRange: endRange
        })
    });
+   
   setStartRange(startRange);
   setEndRange(endRange);
 

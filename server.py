@@ -14,6 +14,7 @@ class User:
         self.items = []#array for shifts
         self.startRange = ""
         self.endRange = ""
+        self.Uid = 1
 
 
     def create_db(self): #create two tables for shifts and settings
@@ -45,34 +46,60 @@ class User:
         self.connection.close()
 
     def get_shifts(self): #get shifts from database
-        pass
+        self.cursor = self.connection.cursor()
+        sql_comand = """SELECT * FROM shifts
+        WHERE (?) =< Date AND (?) >= Date; """
+        self.cursor.execute(sql_comand, (self.startRange, self.endRange))
+        shifts = self.cursor.fetchall()
+        self.connection.commit()
+        self.cursor.close()
+        
  
     def get_settings(self): #get the settings from database
-        pass
+        self.cursor = self.connection.cursor()
+        sql_command = """SELECT * FROM users;"""
+        settings = self.cursor.fetchall()
+        self.connection.commit()
+        self.cursor.close()
 
-    def expected_pay(self):
-        total = 0
-        for item in self.items:
-            if date_compare(item["date"]):
-                hours = (int(item["end"][0:2]) - int(item["start"][0:2]))
-                total += hours * int(self.payrate)
-                if int(item["end"][3:5]) > 0: #for minutes
-                    minute_rate = int(self.payrate) / 60
-                    minutes = (int(item["end"][3:5]) - int(item["start"][3:5]))
-                    if minutes < 0:
-                        minutes = minutes + 60
-                    total += minutes * minute_rate
-        total = total - (total * (int(self.taxrate) / 100))
-        return total
+
         
-    def put_shift(self, date, start, end): #add a shift to the database
-        pass
+    def add_shift(self, sid, date, start, end): #add a shift to the database
+        self.cursor = self.connection.cursor()
+        sql_command = """INSERT INTO shifts 
+        (Sid, Uid, Date, Start, End) 
+        VALUES (?, ?);"""
+        newdate = int(date[11:15]) *10000 + int(datedict[date[4:7]])*100 + int(date[8:11])
+        data = (sid, self.Uid, newdate, start, end)
+        self.cursor.execute(sql_command, data)
+        self.connection.commit()
+        self.cursor.close()
 
-    def delete_shift(self, sid): #delete a shift from the database
-        pass
+
+    def delete_shift(self, sid): #delete a shift from the database given that the shift belongs to the current user
+        for shift in self.items:
+            i = 0
+            to_be_popped = []
+            if shift["id"] == sid and shift["uid"] == self.uid:
+                to_be_popped.append(i) #contains indexes of all to be popped items
+                i += 1
+            for i in to_be_popped:
+                self.items.pop(i)#pop
+
+        self.cursor = self.connection.cursor()
+        sql_commmand = """DELETE * FROM shifts WHERE sid = (?);"""
+        self.cursor.execute(sql_commmand, sid)
+        self.connection.commit()
+        self.cursor.close()
+        
 
     def delete_all_shifts(self):
-        pass
+        self.items = [] #set as empty array
+        self.cursor = self.connection.cursor()
+        sql_commmand = """DELETE FROM shifts;"""
+        self.cursor.execute(sql_commmand)
+        self.connection.commit()
+        self.cursor.close()
 
 
     def put_settings(self, payrate, taxrate): #update the settings
@@ -252,17 +279,9 @@ def update_item(item_id):
     return jsonify({"item": wanted_item})
 
 
-@app.route("/api/items/<int:item_id>", methods=["DELETE"])
+@app.route("/api/items/", methods=["DELETE"]) #deletes all
 def delete_item(item_id):
-    old_item = False
-    for item in User1.items:
-        if item["id"] == item_id:
-            old_item = item
-            break
-    if not old_item:
-        message = f"No item with ID {item_id}."
-        abort(404, message)
-    User1.items.remove(old_item)
+    User1.delete_all_shifts()
     return jsonify({"deleted": True})
 
 

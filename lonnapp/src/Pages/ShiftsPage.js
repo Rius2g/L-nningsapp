@@ -36,7 +36,7 @@ function App() {
 
   const ClearAll = () => { //delete all
     shiftsList.map(todo => {
-        fetch('http://127.0.0.1:5000/api/items/' + todo.id, {
+        fetch('http://127.0.0.1:5000/api/items/', {
          method: 'DELETE', 
          headers: {
            'Content-Type': 'application/json'
