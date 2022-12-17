@@ -3,7 +3,7 @@ from flask import Flask, jsonify, abort, make_response, request
 from flask_cors import CORS
 import time
 from random import random
-import datetime as date
+import sqlite3
 
 class User:
 
@@ -14,6 +14,27 @@ class User:
         self.items = []#array for shifts
         self.startRange = ""
         self.endRange = ""
+
+    def create_db(self):
+        self.connection = sqlite3.connect("shifts.db") #connect to the database
+        self.cursor = self.connection.cursor() #create a cursor
+        sql_command = """ CREATE TABLE IF NOT EXISTS shifts ( 
+                Sid INTEGER PRIMARY KEY,
+                Uid INTEGER NOT NULL,
+                Date INTEGER(255) NOT NULL,
+                Start varchar(255) NOT NULL,
+                End varchar(255) NOT NULL);"""
+
+            #shift id, user id, date, start time, end time
+        self.cursor.execute(sql_command)
+        self.connection.commit()
+        self.cursor.close()
+
+    def close_db(self):
+        self.cursor.close()
+        self.connection.close()
+        
+
 
     def put_settings(self, payrate, taxrate): #update the settings
         self.payrate = payrate
@@ -28,6 +49,7 @@ User1 = User()
 
 app = Flask(__name__)
 CORS(app)
+
 
 
 datedict = {
@@ -97,7 +119,6 @@ def get_taxrate():
     
 @app.route("/api/expectedpay/", methods=["PUT"])
 def get_payrange():
-
     User1.put_range(request.json["startRange"][0:10], request.json["endRange"][0:10])
     return jsonify(startRange=str(User1.startRange), endRange=str(User1.endRange))
 
