@@ -49,7 +49,35 @@ class User:
  
     def get_settings(self): #get the settings from database
         pass
+
+    def expected_pay(self):
+        total = 0
+        for item in self.items:
+            if date_compare(item["date"]):
+                hours = (int(item["end"][0:2]) - int(item["start"][0:2]))
+                total += hours * int(self.payrate)
+                if int(item["end"][3:5]) > 0: #for minutes
+                    minute_rate = int(self.payrate) / 60
+                    minutes = (int(item["end"][3:5]) - int(item["start"][3:5]))
+                    if minutes < 0:
+                        minutes = minutes + 60
+                    total += minutes * minute_rate
+        total = total - (total * (int(self.taxrate) / 100))
+        return total
         
+    def put_shift(self, date, start, end): #add a shift to the database
+        pass
+
+    def delete_shift(self, sid): #delete a shift from the database
+        pass
+
+    def delete_all_shifts(self):
+        pass
+
+    def get_total(self): #calculate the total
+        pass
+
+
 
     def put_settings(self, payrate, taxrate): #update the settings
         self.payrate = payrate
@@ -153,20 +181,8 @@ def date_compare(date): #date to int conversion before comparing
 
 @app.route("/api/expectedpay/", methods=["GET"])
 def get_expectedpay(): 
-    total = 0
-    for item in User1.items:
-        if date_compare(item["date"]):
-            hours = (int(item["end"][0:2]) - int(item["start"][0:2]))
-            total += hours * int(User1.payrate)
-            if int(item["end"][3:5]) > 0: #for minutes
-                minute_rate = int(User1.payrate) / 60
-                minutes = (int(item["end"][3:5]) - int(item["start"][3:5]))
-                if minutes < 0:
-                    minutes = minutes + 60
-                total += minutes * minute_rate
-    total = total - (total * (int(User1.taxrate) / 100))
+    total = User1.expected_pay()
     return jsonify(expectedpay=str(total))
-
 
 
 @app.route("/api/payrate/", methods=["PUT"])
