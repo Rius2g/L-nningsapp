@@ -43,12 +43,18 @@ class User:
     def close_db(self):
         self.cursor.close()
         self.connection.close()
+
+    def get_shifts(self): #get shifts from database
+        pass
+ 
+    def get_settings(self): #get the settings from database
+        pass
         
 
     def put_settings(self, payrate, taxrate): #update the settings
         self.payrate = payrate
         self.taxrate = taxrate
-        
+
 
     def put_range(self, startRange, endRange): #update the range
         self.startRange = startRange
