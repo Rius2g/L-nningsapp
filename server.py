@@ -64,17 +64,19 @@ class User:
                     total += minutes * minute_rate
         total = total - (total * (int(self.taxrate) / 100))
         return total
+
         
     def put_shift(self, date, start, end): #add a shift to the database
         pass
+
+    def put_settings(self, payrate, taxrate):
+        pass
+
 
     def delete_shift(self, sid): #delete a shift from the database
         pass
 
     def delete_all_shifts(self):
-        pass
-
-    def get_total(self): #calculate the total
         pass
 
 
