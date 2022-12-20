@@ -4,6 +4,8 @@ from flask_cors import CORS
 import time
 from random import random
 import sqlite3
+from datetime import datetime
+import json
 
 class User:
 
@@ -12,27 +14,27 @@ class User:
         self.taxrate = 1
 
         self.items = []#array for shifts
-        self.startRange = ""
-        self.endRange = ""
+        self.startRange = datetime.now().strftime("%Y-%m-%d")
+        self.endRange = datetime.now().strftime("%Y-%m-%d")
         self.Uid = 1
 
 
     def create_db(self): #create two tables for shifts and settings
-        self.connection = sqlite3.connect("shifts.db") #connect to the database
+        self.connection = sqlite3.connect("shifts.db", check_same_thread=False) #connect to the database
         self.cursor = self.connection.cursor() #create a cursor
         sql_command = """ CREATE TABLE IF NOT EXISTS shifts ( 
-                Sid INTEGER PRIMARY KEY AUTOINCREMENT,
-                Uid INTEGER NOT NULL AUTOINCREMENT,
+                Sid INTEGER PRIMARY KEY,
+                Uid INTEGER NOT NULL,
                 Date INTEGER(255) NOT NULL,
                 Start varchar(255) NOT NULL,
                 End varchar(255) NOT NULL);"""
 
         sql_command2 = """ CREATE TABLE IF NOT EXISTS users ( 
-                Uid INTEGER PRIMARY KEY AUTOINCREMENT,
+                Uid INTEGER PRIMARY KEY,
                 Payrate INTEGER NOT NULL,
                 Taxrate INTEGER NOT NULL,
-                Name varchar(255)
-                FOREIGN KEY(Uid) REFERENCES shifts(uid));"""
+                Name varchar(255),
+                FOREIGN KEY (Uid) REFERENCES shifts(uid));"""
 
             #shift id, user id, date, start time, end time
         self.cursor.execute(sql_command) #create the shifts table
@@ -48,11 +50,22 @@ class User:
     def get_shifts(self): #get shifts from database
         self.cursor = self.connection.cursor()
         sql_comand = """SELECT * FROM shifts
-        WHERE (?) =< Date AND (?) >= Date; """
-        self.cursor.execute(sql_comand, (self.startRange, self.endRange))
+        WHERE (?) <= Date AND (?) >= Date; """
+        self.cursor.execute(sql_comand, (self.range_convert(self.startRange), self.range_convert(self.endRange)))
         shifts = self.cursor.fetchall()
         self.connection.commit()
         self.cursor.close()
+        if shifts == []:
+            return []
+        else:
+            return shifts
+
+    def create_shifts(self):
+        shift_list = []
+        shifts = self.get_shifts()
+        for shift in shifts:
+            shift_list.append({"id": shift[0], "date": self.convert_date(shift[2]), "start": shift[3], "end": shift[4]})
+        self.items = shift_list
         
  
     def get_settings(self): #get the settings from database
@@ -68,7 +81,7 @@ class User:
         self.cursor = self.connection.cursor()
         sql_command = """INSERT INTO shifts 
         (Sid, Uid, Date, Start, End) 
-        VALUES (?, ?);"""
+        VALUES (?, ?, ?, ?, ?);"""
         newdate = int(date[11:15]) *10000 + int(datedict[date[4:7]])*100 + int(date[8:11])
         data = (sid, self.Uid, newdate, start, end)
         self.cursor.execute(sql_command, data)
@@ -110,10 +123,18 @@ class User:
     def put_range(self, startRange, endRange): #update the range
         self.startRange = startRange
         self.endRange = endRange
+
+    def range_convert(self, date):
+        return int(date[0:4]) *10000 + int(date[5:7])*100 + int(date[8:10])
+
+
+    def convert_date(self, date):
+        date = str(date)
+        return str(date[4:6]) + "/" + str(date[6:8]) + "/" + str(date[0:4])
   
 
 User1 = User() # Create the application instance
-# User1.create_db() #init the databases if not already created
+User1.create_db() #init the databases if not already created
 
 app = Flask(__name__)
 CORS(app)
@@ -172,8 +193,9 @@ def bad_request_error(error):
 
 @app.route("/api/items/", methods=["GET"])
 def get_items(): 
-    items = User1.get_shifts()
-    return jsonify({"items": items})
+    User1.create_shifts()
+    print(User1.items)
+    return jsonify({"items": User1.items})
 
 
 @app.route("/api/payrate/", methods=["GET"])
@@ -245,8 +267,8 @@ def create_item():
     if not isinstance(request.json["date"], str):
         description = f"'name'-field must be str."
         abort(400, description)
-    User1.add_shift(request.json["date"], request.json["start"], request.json["end"])
     new_id = 0 if not User1.items else max(item["id"] for item in User1.items) + 1
+    #User1.add_shift(new_id, request.json["date"], request.json["start"], request.json["end"])
     item = {"id": new_id, "date": request.json["date"], "start": request.json["start"], "end": request.json["end"]}
     User1.items.append(item)
     return jsonify({"item": item}), 201
