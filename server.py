@@ -172,7 +172,8 @@ def bad_request_error(error):
 
 @app.route("/api/items/", methods=["GET"])
 def get_items(): 
-    return jsonify({"items": User1.items})
+    items = User1.get_shifts()
+    return jsonify({"items": items})
 
 
 @app.route("/api/payrate/", methods=["GET"])
@@ -244,6 +245,7 @@ def create_item():
     if not isinstance(request.json["date"], str):
         description = f"'name'-field must be str."
         abort(400, description)
+    User1.add_shift(request.json["date"], request.json["start"], request.json["end"])
     new_id = 0 if not User1.items else max(item["id"] for item in User1.items) + 1
     item = {"id": new_id, "date": request.json["date"], "start": request.json["start"], "end": request.json["end"]}
     User1.items.append(item)
