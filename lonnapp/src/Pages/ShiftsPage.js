@@ -13,7 +13,7 @@ function App() {
   }, []);
 
 
- const addShift = (workDate, startTime, endTime) => {
+  const addShift = (workDate, startTime, endTime) => {
   const newShiftList = shiftsList.concat({ id: shiftsList.length+1, date: workDate, start: startTime, end: endTime })
   setShiftList(newShiftList);
 
@@ -29,9 +29,6 @@ function App() {
         end: endTime
        })
    });
-   fetch('http://127.0.0.1:5000/api/items') //get updated list so it displays without refreshing
-    .then(response => response.json())
-    .then(data => setShiftList(data.items));
   };
 
   const ClearAll = () => { //delete all

@@ -47,7 +47,7 @@ class User:
         self.cursor.close()
         self.connection.close()
 
-    def get_shifts(self): #get shifts from database
+    def get_certain_shifts(self): #get shifts from database
         self.cursor = self.connection.cursor()
         sql_comand = """SELECT * FROM shifts
         WHERE (?) <= Date AND (?) >= Date; """
@@ -60,9 +60,27 @@ class User:
         else:
             return shifts
 
-    def create_shifts(self):
+
+    def get_all_shifts(self):
+        self.cursor = self.connection.cursor()
+        sql_comand = """SELECT * FROM shifts"""
+        self.cursor.execute(sql_comand)
+        shifts = self.cursor.fetchall()
+        self.connection.commit()
+        self.cursor.close()
+        if shifts == []:
+            return []
+        else:
+            return shifts
+            
+
+    def create_shifts(self, bool):
         shift_list = []
-        shifts = self.get_shifts()
+        shifts = []
+        if bool == 1:
+            shifts = self.get_all_shifts()
+        else:
+            shift = self.get_certain_shifts()
         for shift in shifts:
             shift_list.append({"id": shift[0], "date": self.convert_date(shift[2]), "start": shift[3], "end": shift[4]})
         self.items = shift_list
@@ -82,7 +100,7 @@ class User:
         sql_command = """INSERT INTO shifts 
         (Sid, Uid, Date, Start, End) 
         VALUES (?, ?, ?, ?, ?);"""
-        newdate = int(date[11:15]) *10000 + int(datedict[date[4:7]])*100 + int(date[8:11])
+        newdate = int(date[6:10]) *10000 + int(date[3:5])*100 + int(date[0:2])
         data = (sid, self.Uid, newdate, start, end)
         self.cursor.execute(sql_command, data)
         self.connection.commit()
@@ -90,15 +108,6 @@ class User:
 
 
     def delete_shift(self, sid): #delete a shift from the database given that the shift belongs to the current user
-        for shift in self.items:
-            i = 0
-            to_be_popped = []
-            if shift["id"] == sid and shift["uid"] == self.uid:
-                to_be_popped.append(i) #contains indexes of all to be popped items
-                i += 1
-            for i in to_be_popped:
-                self.items.pop(i)#pop
-
         self.cursor = self.connection.cursor()
         sql_commmand = """DELETE * FROM shifts WHERE sid = (?);"""
         self.cursor.execute(sql_commmand, sid)
@@ -130,7 +139,7 @@ class User:
 
     def convert_date(self, date):
         date = str(date)
-        return str(date[4:6]) + "/" + str(date[6:8]) + "/" + str(date[0:4])
+        return str(date[6:8]) + "/" + str(date[4:6]) + "/" + str(date[0:4])
   
 
 User1 = User() # Create the application instance
@@ -191,10 +200,9 @@ def bad_request_error(error):
     return make_response(text, 400)
 
 
-@app.route("/api/items/", methods=["GET"])
+@app.route("/api/items/", methods=["GET"]) #get all shifts
 def get_items(): 
-    User1.create_shifts()
-    print(User1.items)
+    User1.create_shifts(1)
     return jsonify({"items": User1.items})
 
 
@@ -216,7 +224,7 @@ def get_payrange():
 
 
 def date_compare(date): #date to int conversion before comparing
-    newdate = int(date[11:15]) *10000 + int(datedict[date[4:7]])*100 + int(date[8:11])
+    newdate = int(date[11:15])*10000 + int(datedict[date[4:7]])*100 + int(date[8:11])
     startdate = int(User1.startRange[0:4]) *10000 + int(User1.startRange[5:7])*100 + int(User1.startRange[8:10])
     enddate = int(User1.endRange[0:4]) *10000 + int(User1.endRange[5:7])*100 + int(User1.endRange[8:10])
     if newdate >= startdate and newdate <= enddate:
@@ -228,6 +236,7 @@ def date_compare(date): #date to int conversion before comparing
 @app.route("/api/expectedpay/", methods=["GET"])
 def get_expectedpay(): 
     total = 0
+    User1.create_shifts(0) #get shifts in range
     for item in User1.items:
         if date_compare(item["date"]):
             hours = (int(item["end"][0:2]) - int(item["start"][0:2]))
@@ -268,10 +277,11 @@ def create_item():
         description = f"'name'-field must be str."
         abort(400, description)
     new_id = 0 if not User1.items else max(item["id"] for item in User1.items) + 1
-    #User1.add_shift(new_id, request.json["date"], request.json["start"], request.json["end"])
+    User1.add_shift(new_id, request.json["date"], request.json["start"], request.json["end"])
     item = {"id": new_id, "date": request.json["date"], "start": request.json["start"], "end": request.json["end"]}
     User1.items.append(item)
-    return jsonify({"item": item}), 201
+    return jsonify({"items": User1.items}), 201
+
 
 
 @app.route("/api/items/<int:item_id>", methods=["PUT"])
@@ -304,7 +314,7 @@ def update_item(item_id):
 
 
 @app.route("/api/items/", methods=["DELETE"]) #deletes all
-def delete_item(item_id):
+def delete_item():
     User1.delete_all_shifts()
     return jsonify({"deleted": True})
 
