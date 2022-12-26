@@ -149,22 +149,6 @@ app = Flask(__name__)
 CORS(app)
 
 
-
-datedict = {
-    "Jan": "01",
-    "Feb": "02",
-    "Mar": "03",
-    "Apr": "04",
-    "May": "05",
-    "Jun": "06",
-    "Jul": "07",
-    "Aug": "08",
-    "Sep": "09",
-    "Oct": "10",
-    "Nov": "11",
-    "Dec": "12"
-}
-
 # Once your client works, you can apply this decorator
 # to one of the endpoints to add a random delay to simulate
 # the operation taking a long time due to database transactions etc.
@@ -224,7 +208,7 @@ def get_payrange():
 
 
 def date_compare(date): #date to int conversion before comparing
-    newdate = int(date[11:15])*10000 + int(datedict[date[4:7]])*100 + int(date[8:11])
+    newdate = int(date[11:15])*10000 + int(date[4:7])*100 + int(date[8:11])
     startdate = int(User1.startRange[0:4]) *10000 + int(User1.startRange[5:7])*100 + int(User1.startRange[8:10])
     enddate = int(User1.endRange[0:4]) *10000 + int(User1.endRange[5:7])*100 + int(User1.endRange[8:10])
     if newdate >= startdate and newdate <= enddate:
@@ -238,7 +222,7 @@ def get_expectedpay():
     total = 0
     User1.create_shifts(0) #get shifts in range
     for item in User1.items:
-        if date_compare(item["date"]):
+        if date_compare(item["date"]) == True:
             hours = (int(item["end"][0:2]) - int(item["start"][0:2]))
             total += hours * int(User1.payrate)
             if int(item["end"][3:5]) > 0: #for minutes

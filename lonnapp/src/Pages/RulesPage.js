@@ -1,10 +1,15 @@
 import React from 'react';
+import RulesForm from '../components/RulseForm';
+import { Stack } from '@mui/material';
 
 function Rules() {
   return (
-    <div className='rules'>
+    <Stack spacing={1} alignItems="center" justifyContent="center">
       <h1>Rules</h1>
-    </div>
+      <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
+      <RulesForm></RulesForm>
+      </Stack>
+    </Stack>
   );
 }
 
