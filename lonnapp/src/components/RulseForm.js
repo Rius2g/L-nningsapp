@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import Select from "react-dropdown-select";
+import Button from '@mui/material/Button';
 
 
 
 const RulesForm = ({ addRule }) => {
 
-    const [ ruleType, setRuleType ] = useState(''); //contains type (day)
-    const [ increaseT, setIncreaseT ] = useState(''); //contains type (day)
-    const [ ruleValue, setRuleValue ] = useState(''); //contains value (kr increase)
-    const [ ruleList, setRuleList ] = useState([]); //contains all rules
-    const [ rule = {type: ruleType, value: ruleValue}, setRule ] = useState(''); //rule contains type and value
+    const [ ruleType, setRuleType ] = useState(0); //contains type (day)
+    const [ increaseT, setIncreaseT ] = useState(0); //contains type (day)
+    const [ ruleValue, setRuleValue ] = useState(); //contains value (kr increase)
+    const [ rule = {type: ruleType, increasetype: increaseT, value: ruleValue}, setRule ] = useState(); //rule contains type and value
 
     const Days = [
         { label: "Monday", value: 1 },
@@ -62,23 +62,27 @@ const RulesForm = ({ addRule }) => {
     ];
 
     const increaseType = [
-        { label: "%", value: 1 },
-        { label: "kr", value: 2 }
+        { label: "%", value: 0 },
+        { label: "kr", value: 1 }
     ]
 
     const type = [
-        { label: "Day", value: 1 },
-        { label: "Time", value: 2 }
+        { label: "Day", value: 0 },
+        { label: "Time", value: 1 }
     ]
 
-    const setType = type => {
-        setRuleType(type);
+    function handleType(e){
+        setRuleType(ruleType => e[0].value);
+    }
+
+    function handleIncreaseType(e){
+        setIncreaseT(increaseT => e[0].value);
     }
 
 
-
     function handleSubmit() {
-        addRule(rule.toString());
+        setRule(rule => rule);
+        addRule(ruleType, increaseT, ruleValue);
     }
 
 
@@ -89,11 +93,11 @@ const RulesForm = ({ addRule }) => {
           width: 'fit-content',
           display: 'flex',
         }}>
-        <Select options={type}onChange={setType} value={ruleType}> </Select> 
-        <Select options={Days} onChange={setRuleValue} value={ruleValue}> </Select>
-        <Select options={Times} onChange={setRuleValue} value={ruleValue}> </Select>
-        <Select options={increaseType} onChange={setIncreaseT} value={increaseT}> </Select>
-        <Select> </Select>
+        <Select options={type} onChange={handleType} value={ruleType}> </Select>
+        {ruleType ? <Select options={Times} onChange={setRuleValue} value={ruleValue}> </Select> : <Select options={Days} onChange={setRuleValue}> </Select>}
+        <Select options={increaseType} onChange={handleIncreaseType} value={increaseT}> </Select>
+        {increaseT ?  <input type="number" onChange={setRuleValue} value={ruleValue}></input> : <Select options={Values} onChange={setRuleValue} value={ruleValue}> </Select>}
+        <Button variant="contained" onClick={handleSubmit}>Add Rule</Button>
         </div>
       );
 };
