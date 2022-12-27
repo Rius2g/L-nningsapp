@@ -14,6 +14,7 @@ class User:
         self.taxrate = 1
 
         self.items = []#array for shifts
+        self.rules = []
         self.startRange = datetime.now().strftime("%Y-%m-%d")
         self.endRange = datetime.now().strftime("%Y-%m-%d")
         self.Uid = 1
@@ -36,9 +37,20 @@ class User:
                 Name varchar(255),
                 FOREIGN KEY (Uid) REFERENCES shifts(uid));"""
 
+
+        sql_command3 = """ CREATE TABLE IF NOT EXISTS rules (
+                Rid INTEGER PRIMARY KEY,
+                Uid INTEGER NOT NULL,
+                type varchar(255) NOT NULL,
+                value varchar(255) NOT NULL,
+                increaseType varchar(255) NOT NULL,
+                increaseValue varchar(255) NOT NULL;"""
+
+
             #shift id, user id, date, start time, end time
         self.cursor.execute(sql_command) #create the shifts table
         self.cursor.execute(sql_command2) #create the user/settings table with foreign key uid
+        self.cursor.execute(sql_command3) #create the user/settings table with foreign key uid
         self.connection.commit()
         self.cursor.close()
 
@@ -59,6 +71,32 @@ class User:
             return []
         else:
             return shifts
+
+
+    def add_rule(self, id, type, value, increaseType, increaseValue):
+        self.cursor = self.connection.cursor()
+        sql_command = """INSERT INTO rules
+        (Rid, Uid, type, value, increaseType, increaseValue)
+        VALUES (?, ?, ?, ?, ?);"""
+        data = (id, self.Uid, type, value, increaseType, increaseValue)
+        self.cursor.execute(sql_command, data)
+        self.connection.commit()
+        self.cursor.close()
+
+
+    def get_rules(self):
+        self.cursor = self.connection.cursor()
+        sql_comand = """SELECT * FROM rules
+        WHERE Uid = (?);"""
+        self.cursor.execute(sql_comand, self.Uid) #get all the rules for the current user
+        rules = self.cursor.fetchall()
+        self.connection.commit()
+        self.cursor.close()
+        if rules == []:
+            return []
+        else:
+            return rules
+
 
 
     def get_all_shifts(self):
@@ -204,6 +242,22 @@ def get_taxrate():
 def get_payrange():
     User1.put_range(request.json["startRange"][0:10], request.json["endRange"][0:10])
     return jsonify(startRange=str(User1.startRange), endRange=str(User1.endRange))
+
+
+@app.route("/api/rules/", methods=["POST"])
+def post_rule():
+    if not request.json:
+        abort(400, "Must be JSON.")
+    if "value" not in request.json:
+        abort(400, "Must contain 'value'-field.")
+    if not isinstance(request.json["value"], str):
+        description = f"'value'-field must be str."
+        abort(400, description)
+    new_id = 0 if not User1.rules else max(rule["id"] for rule in User1.rules) + 1
+    User1.add_rule(new_id, request.json["type"], request.json["increaseType"], request.json["value"])
+    rule = {"id": new_id, "type": request.json["type"], "increaseType": request.json["increaseType"], "value": request.json["value"]}
+    User1.rules.append(rule)
+    return jsonify({"rules": User1.rules}), 201
 
 
 
