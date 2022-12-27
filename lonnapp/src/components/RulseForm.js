@@ -6,8 +6,9 @@ import Button from '@mui/material/Button';
 
 const RulesForm = ({ addRule }) => {
 
-    const [ ruleType, setRuleType ] = useState(0); //contains type (day)
-    const [ increaseT, setIncreaseT ] = useState(0); //contains type (day)
+    const [ ruleType, setRuleType ] = useState(0); //contains type day or time
+    const [ ruleTypeVal, setRuleTypeVal ] = useState(); //contains THE day or time value
+    const [ increaseT, setIncreaseT ] = useState(0); //contains type (kr increase) or %
     const [ ruleValue, setRuleValue ] = useState(); //contains value (kr increase)
     const [ rule = {type: ruleType, increasetype: increaseT, value: ruleValue}, setRule ] = useState(); //rule contains type and value
 
@@ -79,6 +80,14 @@ const RulesForm = ({ addRule }) => {
         setIncreaseT(increaseT => e[0].value);
     }
 
+    function handleValueType(e){
+        setRuleTypeVal(ruleValue => e[0].value);
+    }
+
+    function handleValue(e){
+        setRuleValue(ruleValue => e[0].target.value);
+    }
+
 
     function handleSubmit() {
         setRule(rule => rule);
@@ -94,9 +103,12 @@ const RulesForm = ({ addRule }) => {
           display: 'flex',
         }}>
         <Select options={type} onChange={handleType} value={ruleType}> </Select>
-        {ruleType ? <Select options={Times} onChange={setRuleValue} value={ruleValue}> </Select> : <Select options={Days} onChange={setRuleValue}> </Select>}
+
+        {ruleType ? <Select options={Times} onChange={handleValueType} value={ruleValue}> </Select> : <Select options={Days} onChange={handleValueType}> </Select>}
+
         <Select options={increaseType} onChange={handleIncreaseType} value={increaseT}> </Select>
-        {increaseT ?  <input type="number" onChange={setRuleValue} value={ruleValue}></input> : <Select options={Values} onChange={setRuleValue} value={ruleValue}> </Select>}
+
+        {increaseT ?  <input type="number" onChange={handleValue} value={ruleValue}></input> : <Select options={Values} onChange={setRuleValue} value={ruleValue}> </Select>}
         <Button variant="contained" onClick={handleSubmit}>Add Rule</Button>
         </div>
       );
