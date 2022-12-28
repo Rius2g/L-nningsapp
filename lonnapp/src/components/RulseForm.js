@@ -69,8 +69,10 @@ const RulesForm = ({ addRule }) => {
 
     const type = [
         { label: "Day", value: 0 },
-        { label: "Time", value: 1 }
+        { label: "Time", value: 1 },
+        {label: "Time and day", value: 2}
     ]
+    
 
     function handleType(e){
         setRuleType(ruleType => e[0].value);

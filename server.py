@@ -93,9 +93,9 @@ class User:
         self.connection.commit()
         self.cursor.close()
         if rules == []:
-            return []
+            self.rules = []
         else:
-            return rules
+            self.rules = rules
 
 
 
@@ -269,6 +269,49 @@ def date_compare(date): #date to int conversion before comparing
         return True
     else:
         return False
+
+
+
+def time_extra(time_Ex, timeend):
+       hours_ex = timeend - time_Ex
+       return hours_ex
+
+def time_compare(time1, timestart):
+    if time1 >= timestart:
+        return True
+
+
+def day_compare(day1, day2):
+    if day1 == day2:
+        return True
+    else:
+        return False
+
+
+
+def rules_extra(shift):
+    for rules in User1.rules:
+        if rules["type"] == "0":
+            if day_compare(rules["value"], shift["day"]) == True: #check if the day is in the range
+                if rules["increaseType"] == "%":
+                    User1.payrate = (int(User1.payrate) * (1 + int(rules["increaseValue"]))) #add the % to the payrate
+                else:
+                    User1.payrate = int(User1.payrate) + int(rules["increaseValue"]) #add the amount in nok
+        elif rules["type"] == "1":
+            if time_compare(rules["value"], shift["start"]) == True:
+                if rules["increaseType"] == "%":
+                    extra = (int(User1.payrate) * (1 + int(rules["increaseValue"])) - int(User1.payrate)) * time_extra(rules["value"], shift["end"])
+                else:
+                    extra = int(rules["increaseValue"]) * time_extra(rules["value"], shift["end"])
+        else: #rules["type"] == "2": day and time
+            if day_compare(rules["value"], shift["day"]) == True and time_compare(rules["value"], shift["start"]) == True:
+                if rules["increaseType"] == "%":
+                    extra = (int(User1.payrate) * (1 + int(rules["increaseValue"])) - int(User1.payrate)) * time_extra(rules["value"], shift["end"])
+                else:
+                    extra = int(rules["increaseValue"]) * time_extra(rules["value"], shift["end"]) #increase val * hours with exra pay
+
+    return extra
+
 
 
 @app.route("/api/expectedpay/", methods=["GET"])
