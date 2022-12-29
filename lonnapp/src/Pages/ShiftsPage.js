@@ -13,8 +13,8 @@ function App() {
   }, []);
 
 
-  const addShift = (workDate, startTime, endTime) => {
-  const newShiftList = shiftsList.concat({ id: shiftsList.length+1, date: workDate, start: startTime, end: endTime })
+  const addShift = (workDate, day, startTime, endTime) => {
+  const newShiftList = shiftsList.concat({ id: shiftsList.length+1, date: workDate, workday: day, start: startTime, end: endTime })
   setShiftList(newShiftList);
 
     fetch('http://127.0.0.1:5000/api/items/', {
@@ -25,6 +25,7 @@ function App() {
        body: JSON.stringify({
         id: shiftsList.length+1,
         date: workDate,
+        workday: day,
         start: startTime,
         end: endTime
        })

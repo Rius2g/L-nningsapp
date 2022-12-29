@@ -26,6 +26,7 @@ class User:
         sql_command = """ CREATE TABLE IF NOT EXISTS shifts ( 
                 Sid INTEGER PRIMARY KEY,
                 Uid INTEGER NOT NULL,
+                Day varchar(255) NOT NULL,
                 Date INTEGER(255) NOT NULL,
                 Start varchar(255) NOT NULL,
                 End varchar(255) NOT NULL);"""
@@ -77,7 +78,7 @@ class User:
         self.cursor = self.connection.cursor()
         sql_command = """INSERT INTO rules
         (Rid, Uid, type, value, increaseType, increaseValue)
-        VALUES (?, ?, ?, ?, ?);"""
+        VALUES (?, ?, ?, ?, ?, ?);"""
         data = (id, self.Uid, type, value, increaseType, increaseValue)
         self.cursor.execute(sql_command, data)
         self.connection.commit()
@@ -133,13 +134,13 @@ class User:
 
 
         
-    def add_shift(self, sid, date, start, end): #add a shift to the database
+    def add_shift(self, sid, date, day, start, end): #add a shift to the database
         self.cursor = self.connection.cursor()
         sql_command = """INSERT INTO shifts 
-        (Sid, Uid, Date, Start, End) 
-        VALUES (?, ?, ?, ?, ?);"""
+        (Sid, Uid, Date, Day, Start, End) 
+        VALUES (?, ?, ?, ?, ?, ?);"""
         newdate = int(date[6:10]) *10000 + int(date[3:5])*100 + int(date[0:2])
-        data = (sid, self.Uid, newdate, start, end)
+        data = (sid, self.Uid, newdate, day, start, end)
         self.cursor.execute(sql_command, data)
         self.connection.commit()
         self.cursor.close()
@@ -358,8 +359,8 @@ def create_item():
         description = f"'name'-field must be str."
         abort(400, description)
     new_id = 0 if not User1.items else max(item["id"] for item in User1.items) + 1
-    User1.add_shift(new_id, request.json["date"], request.json["start"], request.json["end"])
-    item = {"id": new_id, "date": request.json["date"], "start": request.json["start"], "end": request.json["end"]}
+    User1.add_shift(new_id, request.json["date"], request.json["workday"], request.json["start"], request.json["end"])
+    item = {"id": new_id, "date": request.json["date"], "day": request.json["workday"], "start": request.json["start"], "end": request.json["end"]}
     User1.items.append(item)
     return jsonify({"items": User1.items}), 201
 

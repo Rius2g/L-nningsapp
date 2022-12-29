@@ -5,7 +5,6 @@ import '../Shiftpage.css'
 import SendIcon from '@mui/icons-material/Send';
 import Button from '@mui/material/Button';
 import moment from 'moment';
-import { format } from 'date-fns'
 
 
 const ShiftForm = ({ addShift }) => {
@@ -27,9 +26,14 @@ const ShiftForm = ({ addShift }) => {
         return moment(date).format("DD/MM/YYYY");
      }
 
+    function getDay(date){
+        return moment(date).format("ddd");
+     }
+
     function handleSubmit() {
-       var date = format_Date(workDate)
-        addShift(date.toString(), startTime.toString(), endTime.toString());
+        var date = format_Date(workDate)
+        var day = getDay(workDate)
+        addShift(date.toString(), day.toString(), startTime.toString(), endTime.toString());
     }
 
     return (
