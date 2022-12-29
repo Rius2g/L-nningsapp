@@ -121,14 +121,17 @@ class User:
         else:
             shift = self.get_certain_shifts()
         for shift in shifts:
-            shift_list.append({"id": shift[0], "date": self.convert_date(shift[2]), "start": shift[3], "end": shift[4]})
+            shift_list.append({"id": shift[0], "day": shift[2], "date": self.convert_date(shift[3]), "start": shift[4], "end": shift[5]})
         self.items = shift_list
         
  
     def get_settings(self): #get the settings from database
         self.cursor = self.connection.cursor()
         sql_command = """SELECT * FROM users;"""
+        self.cursor.execute(sql_command)
         settings = self.cursor.fetchall()
+        self.payrate = settings["Payrate"]
+        self.taxrate = settings["Taxrate"]
         self.connection.commit()
         self.cursor.close()
 
@@ -290,7 +293,7 @@ def day_compare(day1, day2):
 
 
 
-def rules_extra(shift):
+def rules_extra(shift): #iterate through the rules and check if the shift is in the range for extra pay
     for rules in User1.rules:
         if rules["type"] == "0":
             if day_compare(rules["value"], shift["day"]) == True: #check if the day is in the range
@@ -321,6 +324,7 @@ def get_expectedpay():
     User1.create_shifts(0) #get shifts in range
     for item in User1.items:
         if date_compare(item["date"]) == True:
+            extra = rules_extra(item)
             hours = (int(item["end"][0:2]) - int(item["start"][0:2]))
             total += hours * int(User1.payrate)
             if int(item["end"][3:5]) > 0: #for minutes
@@ -329,7 +333,7 @@ def get_expectedpay():
                 if minutes < 0:
                     minutes = minutes + 60
                 total += minutes * minute_rate
-    total = total - (total * (int(User1.taxrate) / 100))
+    total = total - (total * (int(User1.taxrate) / 100)) + extra
     return jsonify(expectedpay=str(total))
 
 
