@@ -151,8 +151,8 @@ class User:
 
     def delete_shift(self, sid): #delete a shift from the database given that the shift belongs to the current user
         self.cursor = self.connection.cursor()
-        sql_commmand = """DELETE * FROM shifts WHERE sid = (?);"""
-        self.cursor.execute(sql_commmand, sid)
+        sql_commmand = """DELETE * FROM shifts WHERE sid = (?) AND uid = (?);"""
+        self.cursor.execute(sql_commmand, (sid, self.Uid))
         self.connection.commit()
         self.cursor.close()
         
@@ -402,6 +402,13 @@ def update_item(item_id):
 @app.route("/api/items/", methods=["DELETE"]) #deletes all
 def delete_item():
     User1.delete_all_shifts()
+    return jsonify({"deleted": True})
+
+
+@app.route("/api/items/<int:item_id>", methods=["DELETE"])
+def delete_specific_shift():
+    id = request.json["id"]
+    User1.delete_shift(id)
     return jsonify({"deleted": True})
 
 

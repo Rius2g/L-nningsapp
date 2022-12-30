@@ -1,6 +1,9 @@
 import React from 'react';
 
-const Shifts = ({Shift}) => {
+
+
+const Shifts = ({Shift, removeshift}) => {
+
     return (
         <div id={Shift.id} key={Shift.id + Shift.date} name="Shift" value={Shift.id}>
             {Shift.date}

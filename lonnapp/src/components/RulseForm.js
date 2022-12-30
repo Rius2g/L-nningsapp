@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 const RulesForm = ({ addRule }) => {
 
     const [ ruleType, setRuleType ] = useState(0); //contains type day or time
-    const [ ruleTypeVal, setRuleTypeVal ] = useState(); //contains THE day or time value
+    const [ ruleTypeVal, setRuleTypeVal ] = useState(0); //contains THE day or time value
     const [ increaseT, setIncreaseT ] = useState(0); //contains type (kr increase) or %
     const [ ruleValue, setRuleValue ] = useState(); //contains value (kr increase)
     const [ rule = {type: ruleType, increasetype: increaseT, value: ruleValue}, setRule ] = useState(); //rule contains type and value
@@ -106,7 +106,7 @@ const RulesForm = ({ addRule }) => {
         }}>
         <Select options={type} onChange={handleType} value={ruleType}> </Select>
 
-        {ruleType ? <Select options={Times} onChange={handleValueType} value={ruleValue}> </Select> : <Select options={Days} onChange={handleValueType}> </Select>}
+        {ruleType ? <Select options={Times} onChange={handleValueType}> </Select> : <Select options={Days} onChange={handleValueType}> </Select>}
 
         <Select options={increaseType} onChange={handleIncreaseType} value={increaseT}> </Select>
 
