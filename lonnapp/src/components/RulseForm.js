@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Select from "react-dropdown-select";
 import Button from '@mui/material/Button';
+import { Stack } from '@mui/system';
 
 
 
@@ -106,7 +107,30 @@ const RulesForm = ({ addRule }) => {
         }}>
         <Select options={type} onChange={handleType} value={ruleType}> </Select>
 
-        {ruleType ? <Select options={Times} onChange={handleValueType}> </Select> : <Select options={Days} onChange={handleValueType}> </Select>}
+        {(() => {
+
+        if (ruleType === 1) {
+        return (
+
+            <Select options={Days} onChange={handleValueType}> </Select>
+        )
+        } else if (ruleType === 2) {
+        return (
+
+            <Select options={Times} onChange={handleValueType}> </Select>
+        )
+        } else {
+        return (
+            <Stack direction="rowline">
+
+            <Select options={Days} onChange={handleValueType}> </Select>
+            <Select options={Times} onChange={handleValueType}> </Select>
+
+            </Stack>
+        )
+        }
+
+    })()}
 
         <Select options={increaseType} onChange={handleIncreaseType} value={increaseT}> </Select>
 
