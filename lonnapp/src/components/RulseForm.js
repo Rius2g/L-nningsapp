@@ -84,7 +84,7 @@ const RulesForm = ({ addRule }) => {
     }
 
     function handleValueType(e){
-        setRuleTypeVal(ruleValue => e[0].value);
+        setRuleTypeVal(ruleTypeVal => e[0].value);
     }
 
     function handleValue(e){
@@ -94,7 +94,7 @@ const RulesForm = ({ addRule }) => {
 
     function handleSubmit() {
         setRule(rule => rule);
-        addRule(ruleType, increaseT, ruleValue);
+        addRule(ruleType, ruleTypeVal, increaseT, ruleValue);
     }
 
 
@@ -109,22 +109,22 @@ const RulesForm = ({ addRule }) => {
 
         {(() => {
 
-        if (ruleType === 1) {
+        if (ruleType === 0) {
         return (
 
-            <Select options={Days} onChange={handleValueType}> </Select>
+            <Select options={Days} onChange={handleValueType} value={ruleTypeVal}> </Select>
         )
-        } else if (ruleType === 2) {
+        } else if (ruleType === 1) {
         return (
 
-            <Select options={Times} onChange={handleValueType}> </Select>
+            <Select options={Times} onChange={handleValueType} value={ruleTypeVal}> </Select>
         )
         } else {
         return (
             <Stack direction="rowline">
 
-            <Select options={Days} onChange={handleValueType}> </Select>
-            <Select options={Times} onChange={handleValueType}> </Select>
+            <Select options={Days} onChange={handleValueType} value={ruleTypeVal}> </Select>
+            <Select options={Times} onChange={handleValueType} value={ruleTypeVal}> </Select>
 
             </Stack>
         )

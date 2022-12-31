@@ -14,7 +14,7 @@ class User:
         self.taxrate = 1
 
         self.items = []#array for shifts
-        self.rules = []
+        self.rules = [] #array for rules
         self.startRange = datetime.now().strftime("%Y-%m-%d")
         self.endRange = datetime.now().strftime("%Y-%m-%d")
         self.Uid = 1
@@ -23,6 +23,7 @@ class User:
     def create_db(self): #create two tables for shifts and settings
         self.connection = sqlite3.connect("shifts.db", check_same_thread=False) #connect to the database
         self.cursor = self.connection.cursor() #create a cursor
+
         sql_command = """ CREATE TABLE IF NOT EXISTS shifts ( 
                 Sid INTEGER PRIMARY KEY,
                 Uid INTEGER NOT NULL,
@@ -30,6 +31,7 @@ class User:
                 Date INTEGER(255) NOT NULL,
                 Start varchar(255) NOT NULL,
                 End varchar(255) NOT NULL);"""
+
 
         sql_command2 = """ CREATE TABLE IF NOT EXISTS users ( 
                 Uid INTEGER PRIMARY KEY,
@@ -45,15 +47,18 @@ class User:
                 type varchar(255) NOT NULL,
                 value varchar(255) NOT NULL,
                 increaseType varchar(255) NOT NULL,
-                increaseValue varchar(255) NOT NULL;"""
+                increaseValue varchar(255) NOT NULL,
+                FOREIGN KEY (Uid) REFERENCES shifts(uid));"""
 
 
-            #shift id, user id, date, start time, end time
+        #shift id, user id, date, start time, end time
         self.cursor.execute(sql_command) #create the shifts table
-        self.cursor.execute(sql_command2) #create the user/settings table with foreign key uid
-        self.cursor.execute(sql_command3) #create the user/settings table with foreign key uid
+        self.cursor.execute(sql_command2) #create the shifts table
+        self.cursor.execute(sql_command3) #create the shifts table
         self.connection.commit()
         self.cursor.close()
+
+
 
 
     def close_db(self):
@@ -74,12 +79,12 @@ class User:
             return shifts
 
 
-    def add_rule(self, id, type, value, increaseType, increaseValue):
+    def add_rule(self, id, type, typeVal, increaseType, increaseValue):
         self.cursor = self.connection.cursor()
         sql_command = """INSERT INTO rules
         (Rid, Uid, type, value, increaseType, increaseValue)
         VALUES (?, ?, ?, ?, ?, ?);"""
-        data = (id, self.Uid, type, value, increaseType, increaseValue)
+        data = (id, int(self.Uid), str(type), str(typeVal), str(increaseType), str(increaseValue))
         self.cursor.execute(sql_command, data)
         self.connection.commit()
         self.cursor.close()
@@ -89,7 +94,8 @@ class User:
         self.cursor = self.connection.cursor()
         sql_comand = """SELECT * FROM rules
         WHERE Uid = (?);"""
-        self.cursor.execute(sql_comand, self.Uid) #get all the rules for the current user
+        data = str(self.Uid)
+        self.cursor.execute(sql_comand, data) #get all the rules for the current user
         rules = self.cursor.fetchall()
         self.connection.commit()
         self.cursor.close()
@@ -167,6 +173,10 @@ class User:
 
 
     def put_settings(self, payrate, taxrate): #update the settings
+        self.cursor = self.connection.cursor()
+        sql_command = """UPDATE users
+        SET Payrate = (?), Taxrate = (?)""";
+        self.cursor.execute(sql_command, (payrate, taxrate))
         self.payrate = payrate
         self.taxrate = taxrate
 
@@ -182,27 +192,13 @@ class User:
     def convert_date(self, date):
         date = str(date)
         return str(date[6:8]) + "/" + str(date[4:6]) + "/" + str(date[0:4])
-  
+
 
 User1 = User() # Create the application instance
-User1.create_db() #init the databases if not already created
+User1.create_db()
 
 app = Flask(__name__)
 CORS(app)
-
-
-# Once your client works, you can apply this decorator
-# to one of the endpoints to add a random delay to simulate
-# the operation taking a long time due to database transactions etc.
-def randomdelay(func):
-    print("Applying random delay to", func.__name__)
-
-    def inner(*args, **kwargs):
-        time.sleep(random() * 5)
-        return func(*args, **kwargs)
-
-    return inner
-
 
 @app.errorhandler(405)
 def not_allowed_error(error):
@@ -248,17 +244,24 @@ def get_payrange():
     return jsonify(startRange=str(User1.startRange), endRange=str(User1.endRange))
 
 
+
+@app.route("/api/rules/", methods=["GET"])
+def return_rules():
+    User1.get_rules()
+    print(User1.rules)
+    return jsonify({"rules": User1.rules}), 200
+
+
+
 @app.route("/api/rules/", methods=["POST"])
 def post_rule():
     if not request.json:
         abort(400, "Must be JSON.")
     if "value" not in request.json:
         abort(400, "Must contain 'value'-field.")
-    if not isinstance(request.json["value"], str):
-        description = f"'value'-field must be str."
-        abort(400, description)
-    new_id = 0 if not User1.rules else max(rule["id"] for rule in User1.rules) + 1
-    User1.add_rule(new_id, request.json["type"], request.json["increaseType"], request.json["value"])
+    new_id = 0 if not User1.rules else max(rule[0] for rule in User1.rules) + 1
+    print(new_id)
+    User1.add_rule(new_id, request.json["type"], request.json["typeVal"], request.json["increaseType"], request.json["value"])
     rule = {"id": new_id, "type": request.json["type"], "increaseType": request.json["increaseType"], "value": request.json["value"]}
     User1.rules.append(rule)
     return jsonify({"rules": User1.rules}), 201
@@ -277,7 +280,8 @@ def date_compare(date): #date to int conversion before comparing
 
 
 def time_extra(time_Ex, timeend):
-       hours_ex = timeend - time_Ex
+
+       hours_ex = timeend[0:1] - time_Ex[3:4]
        return hours_ex
 
 def time_compare(time1, timestart):
