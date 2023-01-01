@@ -289,8 +289,18 @@ def date_compare(date): #date to int conversion before comparing
 
 
 def time_extra(time_Ex, timeend): #calculate the extra hours
-       hours_ex = timeend - time_Ex
-       return hours_ex
+    time_ext = timeend[:2] - time_Ex[:2]
+    if time_ext < 0:
+        time_ext = 24 + time_ext
+    return time_ext
+
+
+def minutes_extra(timeend, time_ex):
+    minutes_extra = timeend[2:] - time_ex[2:]
+    if minutes_extra < 0:
+        minutes_extra = 60 + minutes_extra
+    return minutes_extra
+    
 
 def time_compare(time1, timestart):
     if time1 >= timestart:
@@ -306,32 +316,41 @@ def day_compare(day1, day2):
 
 
 def rules_extra(shift): #iterate through the rules and check if the shift is in the range for extra pay
+    extra_hours = 0
+    extra_minutes = 0
     for rules in User1.rules:
         if rules["type"] == "0":
             if day_compare(rules["value"], shift["day"]) == True: #check if the day is in the range
                 if rules["increaseType"] == "%":
-                    User1.payrate = (int(User1.payrate) * (1 + int(rules["increaseValue"]))) #add the % to the payrate
+                    extra_hours = (int(User1.payrate) * (1 + int(rules["increaseValue"]))) * time_extra(shift["end"], rules["value"])#add the % to the payrate
+                    extra_minutes = (int(User1.payrate) * (1 + int(rules["increaseValue"]))) * minutes_extra(shift["end"], rules["value"]) / 60
                 else:
-                    User1.payrate = int(User1.payrate) + int(rules["increaseValue"]) #add the amount in nok
+                    extra_hours =  int(rules["increaseValue"]) * time_extra(shift["end"], rules["value"])#add the % to the payrate
+                    extra_minutes = int(rules["increaseValue"]) * minutes_extra(shift["end"], rules["value"]) / 60 #add the amount in nok
         elif rules["type"] == "1":
             if time_compare(rules["value"], shift["start"]) == True:
                 if rules["increaseType"] == "%":
-                    extra = (int(User1.payrate) * (1 + int(rules["increaseValue"])) - int(User1.payrate)) * time_extra(rules["value"], shift["end"])
+                    extra_hours = (int(User1.payrate) * (1 + int(rules["increaseValue"]))) * time_extra(shift["end"], rules["value"])#add the % to the payrate
+                    extra_minutes = (int(User1.payrate) * (1 + int(rules["increaseValue"]))) * minutes_extra(shift["end"], rules["value"]) / 60
                 else:
-                    extra = int(rules["increaseValue"]) * time_extra(rules["value"], shift["end"])
+                    extra_hours =  int(rules["increaseValue"]) * time_extra(shift["end"], rules["value"])#add the % to the payrate
+                    extra_minutes = int(rules["increaseValue"]) * minutes_extra(shift["end"], rules["value"]) / 60 #add the amount in nok
         else: #rules["type"] == "2": day and time
             if day_compare(rules["value"], shift["day"]) == True and time_compare(rules["value"], shift["start"]) == True:
                 if rules["increaseType"] == "%":
-                    extra = (int(User1.payrate) * (1 + int(rules["increaseValue"])) - int(User1.payrate)) * time_extra(rules["value"], shift["end"])
+                    extra_hours = (int(User1.payrate) * (1 + int(rules["increaseValue"]))) * time_extra(shift["end"], rules["value"])#add the % to the payrate
+                    extra_minutes = (int(User1.payrate) * (1 + int(rules["increaseValue"]))) * minutes_extra(shift["end"], rules["value"]) / 60
                 else:
-                    extra = int(rules["increaseValue"]) * time_extra(rules["value"], shift["end"]) #increase val * hours with exra pay
+                    extra_hours =  int(rules["increaseValue"]) * time_extra(shift["end"], rules["value"])#add the % to the payrate
+                    extra_minutes = int(rules["increaseValue"]) * minutes_extra(shift["end"], rules["value"]) / 60 #add the amount in nok
 
-    return extra
+    return extra_hours + extra_minutes
 
 
 
 @app.route("/api/expectedpay/", methods=["GET"])
 def get_expectedpay(): 
+    extra = 0
     total = 0
     User1.create_shifts(0) #get shifts in range
     for item in User1.items:
