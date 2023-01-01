@@ -88,9 +88,8 @@ const RulesForm = ({ addRule }) => {
     }
 
     function handleValue(e){
-        setRuleValue(ruleValue => e[0].target.value);
+        setRuleValue(e.currentTarget.value);
     }
-
 
     function handleSubmit() {
         setRule(rule => rule);

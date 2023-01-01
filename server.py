@@ -25,7 +25,7 @@ class User:
         self.cursor = self.connection.cursor() #create a cursor
 
         sql_command = """ CREATE TABLE IF NOT EXISTS shifts ( 
-                Sid INTEGER PRIMARY KEY,
+                Sid INTEGER PRIMARY KEY AUTOINCREMENT,
                 Uid INTEGER NOT NULL,
                 Day varchar(255) NOT NULL,
                 Date INTEGER(255) NOT NULL,
@@ -42,7 +42,7 @@ class User:
 
 
         sql_command3 = """ CREATE TABLE IF NOT EXISTS rules (
-                Rid INTEGER PRIMARY KEY,
+                Rid INTEGER PRIMARY KEY AUTOINCREMENT,
                 Uid INTEGER NOT NULL,
                 type varchar(255) NOT NULL,
                 value varchar(255) NOT NULL,
@@ -59,6 +59,14 @@ class User:
         self.cursor.close()
 
 
+    def get_largest_rule_id(self):
+        self.cursor = self.connection.cursor()
+        sql_command = """SELECT MAX(rid) FROM rules WHERE uid = (?);"""
+        self.cursor.execute(sql_command, str(self.Uid))
+        max_id = self.cursor.fetchall()
+        self.connection.commit()
+        self.cursor.close()
+        return max_id[0][0]
 
 
     def close_db(self):
@@ -79,12 +87,12 @@ class User:
             return shifts
 
 
-    def add_rule(self, id, type, typeVal, increaseType, increaseValue):
+    def add_rule(self, type, typeVal, increaseType, increaseValue):
         self.cursor = self.connection.cursor()
         sql_command = """INSERT INTO rules
-        (Rid, Uid, type, value, increaseType, increaseValue)
-        VALUES (?, ?, ?, ?, ?, ?);"""
-        data = (id, int(self.Uid), str(type), str(typeVal), str(increaseType), str(increaseValue))
+        (Rid, type, value, increaseType, increaseValue)
+        VALUES (?, ?, ?, ?, ?);"""
+        data = (id, str(type), str(typeVal), str(increaseType), str(increaseValue))
         self.cursor.execute(sql_command, data)
         self.connection.commit()
         self.cursor.close()
@@ -146,10 +154,10 @@ class User:
     def add_shift(self, sid, date, day, start, end): #add a shift to the database
         self.cursor = self.connection.cursor()
         sql_command = """INSERT INTO shifts 
-        (Sid, Uid, Date, Day, Start, End) 
-        VALUES (?, ?, ?, ?, ?, ?);"""
+        (Uid, Date, Day, Start, End) 
+        VALUES (?, ?, ?, ?, ?);"""
         newdate = int(date[6:10]) *10000 + int(date[3:5])*100 + int(date[0:2])
-        data = (sid, self.Uid, newdate, day, start, end)
+        data = (self.Uid, newdate, day, start, end)
         self.cursor.execute(sql_command, data)
         self.connection.commit()
         self.cursor.close()
@@ -175,7 +183,7 @@ class User:
     def put_settings(self, payrate, taxrate): #update the settings
         self.cursor = self.connection.cursor()
         sql_command = """UPDATE users
-        SET Payrate = (?), Taxrate = (?)""";
+        SET Payrate = (?), Taxrate = (?);"""
         self.cursor.execute(sql_command, (payrate, taxrate))
         self.payrate = payrate
         self.taxrate = taxrate
@@ -184,6 +192,7 @@ class User:
     def put_range(self, startRange, endRange): #update the range
         self.startRange = startRange
         self.endRange = endRange
+
 
     def range_convert(self, date):
         return int(date[0:4]) *10000 + int(date[5:7])*100 + int(date[8:10])
@@ -194,8 +203,10 @@ class User:
         return str(date[6:8]) + "/" + str(date[4:6]) + "/" + str(date[0:4])
 
 
+
 User1 = User() # Create the application instance
 User1.create_db()
+
 
 app = Flask(__name__)
 CORS(app)
@@ -259,9 +270,8 @@ def post_rule():
         abort(400, "Must be JSON.")
     if "value" not in request.json:
         abort(400, "Must contain 'value'-field.")
-    new_id = 0 if not User1.rules else max(rule[0] for rule in User1.rules) + 1
-    print(new_id)
-    User1.add_rule(new_id, request.json["type"], request.json["typeVal"], request.json["increaseType"], request.json["value"])
+    new_id = User1.get_largest_rule_id() + 1
+    User1.add_rule(request.json["type"], request.json["typeVal"], request.json["increaseType"], request.json["value"])
     rule = {"id": new_id, "type": request.json["type"], "increaseType": request.json["increaseType"], "value": request.json["value"]}
     User1.rules.append(rule)
     return jsonify({"rules": User1.rules}), 201
@@ -278,10 +288,8 @@ def date_compare(date): #date to int conversion before comparing
         return False
 
 
-
-def time_extra(time_Ex, timeend):
-
-       hours_ex = timeend[0:1] - time_Ex[3:4]
+def time_extra(time_Ex, timeend): #calculate the extra hours
+       hours_ex = timeend - time_Ex
        return hours_ex
 
 def time_compare(time1, timestart):
