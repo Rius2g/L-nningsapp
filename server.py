@@ -1,8 +1,6 @@
 #! flask/bin/python3
 from flask import Flask, jsonify, abort, make_response, request
 from flask_cors import CORS
-import sqlite3
-from datetime import datetime
 from User import User
 
 
