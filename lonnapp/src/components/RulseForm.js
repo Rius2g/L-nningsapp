@@ -98,7 +98,6 @@ const RulesForm = ({ addRule }) => {
         addRule(ruleType, ruleTypeVal, increaseT, ruleValue);
     }
 
-
     return (
       
         <div className='rowline' style={{
