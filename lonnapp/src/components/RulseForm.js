@@ -10,8 +10,7 @@ const RulesForm = ({ addRule }) => {
     const [ ruleType, setRuleType ] = useState(0); //contains type day or time
     const [ ruleTypeVal, setRuleTypeVal ] = useState(0); //contains THE day or time value
     const [ increaseT, setIncreaseT ] = useState(0); //contains type (kr increase) or %
-    const [ ruleValue, setRuleValue ] = useState(); //contains value (kr increase)
-    const [ rule = {type: ruleType, increasetype: increaseT, value: ruleValue}, setRule ] = useState(); //rule contains type and value
+    const [ ruleValue, setRuleValue ] = useState(0); //contains value (kr increase)
 
     const Days = [
         { label: "Monday", value: 1 },
@@ -23,7 +22,7 @@ const RulesForm = ({ addRule }) => {
         { label: "Sunday", value: 7 }
       ];
 
-    const Values = [
+    const percentage = [
         { label: "10%", value: 10 },
         { label: "20%", value: 20 },
         { label: "30%", value: 30 },
@@ -91,8 +90,11 @@ const RulesForm = ({ addRule }) => {
         setRuleValue(e.currentTarget.value);
     }
 
+    function handlePercentage(e){
+        setRuleValue(ruleValue => e[0].value)
+    }
+
     function handleSubmit() {
-        setRule(rule => rule);
         addRule(ruleType, ruleTypeVal, increaseT, ruleValue);
     }
 
@@ -133,7 +135,7 @@ const RulesForm = ({ addRule }) => {
 
         <Select options={increaseType} onChange={handleIncreaseType} value={increaseT}> </Select>
 
-        {increaseT ?  <input type="number" onChange={handleValue} value={ruleValue}></input> : <Select options={Values} onChange={setRuleValue} value={ruleValue}> </Select>}
+        {increaseT ?  <input type="number" onChange={handleValue} value={ruleValue}></input> : <Select options={percentage} onChange={handlePercentage} value={ruleValue}> </Select>}
         <Button variant="contained" onClick={handleSubmit}>Add Rule</Button>
         </div>
       );

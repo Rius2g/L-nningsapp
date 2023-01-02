@@ -37,7 +37,7 @@ function App() {
 
     setShiftList(newList);
 
-    fetch('http://127.0.0.1:5000/api/items/' + DelShift.id, {
+    fetch('http://127.0.0.1:5000/api/items/?' + DelShift.id, {
          method: 'DELETE', 
          headers: {
            'Content-Type': 'application/json'
@@ -46,6 +46,8 @@ function App() {
           id: DelShift.id
          })
      });
+     
+     
   }
 
   const ClearAll = () => { //delete all

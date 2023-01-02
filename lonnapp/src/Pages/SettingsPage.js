@@ -1,6 +1,5 @@
 import { Button, Stack } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import UserDisplay from '../components/UserList';
 import SendIcon from '@mui/icons-material/Send';
 import TextField from '@mui/material/TextField';
 

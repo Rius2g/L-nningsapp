@@ -1,11 +1,8 @@
 #! flask/bin/python3
 from flask import Flask, jsonify, abort, make_response, request
 from flask_cors import CORS
-import time
-from random import random
 import sqlite3
 from datetime import datetime
-import json
 
 class User:
 
@@ -73,6 +70,7 @@ class User:
         self.cursor.close()
         self.connection.close()
 
+
     def get_certain_shifts(self): #get shifts from database
         self.cursor = self.connection.cursor()
         sql_comand = """SELECT * FROM shifts
@@ -90,9 +88,9 @@ class User:
     def add_rule(self, type, typeVal, increaseType, increaseValue):
         self.cursor = self.connection.cursor()
         sql_command = """INSERT INTO rules
-        (Rid, type, value, increaseType, increaseValue)
+        (Uid, type, value, increaseType, increaseValue)
         VALUES (?, ?, ?, ?, ?);"""
-        data = (id, str(type), str(typeVal), str(increaseType), str(increaseValue))
+        data = (int(self.Uid), str(type), str(typeVal), str(increaseType), str(increaseValue))
         self.cursor.execute(sql_command, data)
         self.connection.commit()
         self.cursor.close()
@@ -112,6 +110,12 @@ class User:
         else:
             self.rules = rules
 
+    def delete_certain_rule(self):
+        self.cursor = self.connection.cursor()
+        sql_command = """DELETE FROM rules WHERE increaseType = (?);"""
+        self.cursor.execute(sql_command, str(0))
+        self.connection.commit()
+        self.cursor.close()
 
 
     def get_all_shifts(self):
@@ -259,7 +263,6 @@ def get_payrange():
 @app.route("/api/rules/", methods=["GET"])
 def return_rules():
     User1.get_rules()
-    print(User1.rules)
     return jsonify({"rules": User1.rules}), 200
 
 
@@ -270,6 +273,7 @@ def post_rule():
         abort(400, "Must be JSON.")
     if "value" not in request.json:
         abort(400, "Must contain 'value'-field.")
+    User1.delete_certain_rule()
     new_id = User1.get_largest_rule_id() + 1
     User1.add_rule(request.json["type"], request.json["typeVal"], request.json["increaseType"], request.json["value"])
     rule = {"id": new_id, "type": request.json["type"], "increaseType": request.json["increaseType"], "value": request.json["value"]}
